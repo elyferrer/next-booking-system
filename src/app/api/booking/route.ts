@@ -5,21 +5,66 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET () {
     try {
         await connectMongoDB();
-        const bookings = await Booking.find().populate('status')
-        .populate({
-            path: 'userId',
-            populate: { path: 'userType' }
-        }).populate({
-            path: 'outboundSchedule',
-            populate: [
-                { path: 'bus', populate: ['busClass', 'busCompany'] },
-                { path: 'busRoute', populate: ['source', 'destination'] }
-            ]
-        });
+        const bookings = await Booking.aggregate([
+            {
+                "$lookup": {
+                    "from": 'users', "localField": 'userId', "foreignField": '_id', "as": 'user'
+                }
+            }, { "$unwind": "$user" },
+            {
+                "$lookup": {
+                    "from": "usertypes", "localField": "user.userType", "foreignField": "_id", "as": "user.userType"
+                }
+            }, { "$unwind": "$user.userType" },
+            
+            {
+                "$lookup": {
+                    "from": 'status', "localField": 'status', "foreignField": '_id', "as": 'status'
+                }
+            }, { "$unwind": "$status" },
+            
+            {
+                "$lookup": {
+                    "from": 'schedules', "localField": 'outboundSchedule', "foreignField": '_id', "as": 'outboundSchedule'
+                }
+            }, { "$unwind": "$outboundSchedule" },
+            {
+                "$lookup": {
+                    "from": 'buses', "localField": 'outboundSchedule.bus', "foreignField": '_id', "as": 'outboundSchedule.bus'
+                }
+            }, { "$unwind": "$outboundSchedule.bus" },
+            {
+                "$lookup": {
+                    "from": 'busclasses', "localField": 'outboundSchedule.bus.busClass', "foreignField": '_id', "as": 'outboundSchedule.bus.busClass'
+                }
+            }, { "$unwind": "$outboundSchedule.bus.busClass" },
+            {
+                "$lookup": {
+                    "from": 'buscompanies', "localField": 'outboundSchedule.bus.busCompany', "foreignField": '_id', "as": 'outboundSchedule.bus.busCompany'
+                }
+            }, { "$unwind": "$outboundSchedule.bus.busCompany" },
+            
+            {
+                "$lookup": {
+                    "from": 'busroutes', "localField": 'outboundSchedule.busRoute', "foreignField": '_id', "as": 'outboundSchedule.busRoute'
+                }
+            }, { "$unwind": "$outboundSchedule.busRoute" },
+            {
+                "$lookup": {
+                    "from": 'places', "localField": 'outboundSchedule.busRoute.source', "foreignField": '_id', "as": 'outboundSchedule.busRoute.source'
+                }
+            }, { "$unwind": "$outboundSchedule.busRoute.source" },
+            {
+                "$lookup": {
+                    "from": 'places', "localField": 'outboundSchedule.busRoute.destination', "foreignField": '_id', "as": 'outboundSchedule.busRoute.destination'
+                }
+            }, { "$unwind": "$outboundSchedule.busRoute.destination" },
+        ]);
 
         return NextResponse.json({ bookings });
     } catch (error) {
-        return NextResponse.json({ message: 'Failed to retrieve bookings' }, { status: 500 })
+        console.log(error);
+        return NextResponse.json({ error }, { status: 500 })
     }
 }
 

@@ -5,7 +5,18 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET () {
     try {
         await connectMongoDB();
-        const data = await Bus.find().populate(['busClass', 'busCompany']);
+        const data = await Bus.aggregate([
+            {
+                "$lookup": {
+                    "from": "busclasses", "localField": "busClass", "foreignField": "_id", "as": "busClass"
+                }
+            }, { "$unwind": "$busClass"},
+            {
+                "$lookup": {
+                    "from": "buscompanies", "localField": "busCompany", "foreignField": "_id", "as": "busCompany"
+                }
+            }, { "$unwind": "$busCompany"}
+        ]);
 
         return NextResponse.json({ message: 'Successfully retrieved data', data }, { status: 200 });
     } catch (error) {

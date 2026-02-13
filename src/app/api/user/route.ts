@@ -6,7 +6,13 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET () {
     try {
         await connectMongoDB();
-        const data = await User.find();
+        const data = await User.aggregate([
+            {
+                "$lookup": {
+                    "from": "usertypes", "localField": "userType", "foreignField": "_id", "as": "userType"
+                }
+            }, { "$unwind": "$userType" }
+        ]);
 
         return NextResponse.json({ message: 'Successfully retrieved data', data }, { status: 200 });
     } catch (error) {
