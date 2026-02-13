@@ -1,11 +1,12 @@
 import User from "@/lib/models/user";
 import connectMongoDB from "@/lib/mongodbConnection";
+import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET () {
     try {
         await connectMongoDB();
-        const data = await User.find().populate(['bus', 'busRoute']);
+        const data = await User.find();
 
         return NextResponse.json({ message: 'Successfully retrieved data', data }, { status: 200 });
     } catch (error) {
@@ -17,8 +18,34 @@ export async function GET () {
 export async function POST (request: NextRequest) {
     try {
         await connectMongoDB();
-        const { bus, busRoute, departureDatetime, arrivalDatetime, price } = await request.json();
-        const data = new User({ bus, busRoute, departureDatetime, arrivalDatetime, price });
+        const { 
+            lastName, 
+            firstName, 
+            email,
+            mobile, 
+            username, 
+            password,
+            emailVerifiedAt,
+            userType,
+            active
+        } = await request.json();
+
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const data = new User({
+            lastName,
+            firstName, 
+            email,
+            mobile, 
+            username, 
+            password: hashedPassword,
+            emailVerifiedAt,
+            userType,
+            active
+        });
+        
         await data.save();
 
         return NextResponse.json({ message: 'Record successfully created', data }, { status: 201 });

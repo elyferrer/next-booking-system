@@ -5,7 +5,17 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET () {
     try {
         await connectMongoDB();
-        const bookings = await Booking.find();
+        const bookings = await Booking.find().populate('status')
+        .populate({
+            path: 'userId',
+            populate: { path: 'userType' }
+        }).populate({
+            path: 'outboundSchedule',
+            populate: [
+                { path: 'bus', populate: ['busClass', 'busCompany'] },
+                { path: 'busRoute', populate: ['source', 'destination'] }
+            ]
+        });
 
         return NextResponse.json({ bookings });
     } catch (error) {
@@ -17,6 +27,7 @@ export async function POST (request: NextRequest) {
     try {
         await connectMongoDB();
         const { 
+            userId,
             outboundSchedule, 
             returnSchedule, 
             passengers, 
@@ -27,6 +38,7 @@ export async function POST (request: NextRequest) {
         } = await request.json();
 
         const newBooking = new Booking({
+            userId,
             outboundSchedule, 
             returnSchedule, 
             passengers, 
@@ -43,6 +55,6 @@ export async function POST (request: NextRequest) {
             data: newBooking 
         }, { status: 201 });
     } catch (error) {
-        return NextResponse.json({ message: 'Failed to book' }, { status: 500 })
+        return NextResponse.json({ message: error }, { status: 500 })
     }
 }

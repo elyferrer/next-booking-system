@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
     mobile: String,
     username: String,
     password: String,
-    emailVerifiedAt: String,
+    emailVerifiedAt: Date,
     userType: { type: mongoose.Schema.Types.ObjectId, ref: 'UserType' },
     active: Boolean
 }, {

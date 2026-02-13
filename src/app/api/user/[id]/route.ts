@@ -1,5 +1,6 @@
 import User from "@/lib/models/user";
 import connectMongoDB from "@/lib/mongodbConnection";
+import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH (request: NextRequest, { params }: { params: { id: string } }) {
@@ -8,6 +9,14 @@ export async function PATCH (request: NextRequest, { params }: { params: { id: s
 
         const { id } = await params;
         const formData = await request.json();
+
+        if (formData.password) {
+            const saltRounds = 10;
+            const salt = await bcrypt.genSalt(saltRounds);
+            const hashedPassword = await bcrypt.hash(formData.password, salt);
+            formData.password = hashedPassword;
+        }
+
         const data = await User.findByIdAndUpdate(
             id,
             { $set: formData },
