@@ -8,6 +8,6 @@ const statusSchema = new mongoose.Schema({
     timestamps: true
 });
 
-const Status = mongoose.models.status || mongoose.model('BusClass', statusSchema);
+const Status = mongoose.models.Status || mongoose.model('Status', statusSchema);
 
 export default Status;

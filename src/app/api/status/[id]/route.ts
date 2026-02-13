@@ -1,4 +1,4 @@
-import BusClass from "@/lib/models/busClass";
+import Status from "@/lib/models/status";
 import connectMongoDB from "@/lib/mongodbConnection";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -8,7 +8,7 @@ export async function PATCH (request: NextRequest, { params }: { params: { id: s
 
         const { id } = await params;
         const formData = await request.json();
-        const data = await BusClass.findByIdAndUpdate(
+        const data = await Status.findByIdAndUpdate(
             id,
             { $set: formData },
             { new: true, runValidators: true }
@@ -16,7 +16,7 @@ export async function PATCH (request: NextRequest, { params }: { params: { id: s
 
         return NextResponse.json({ message: 'Successfully updated record', data }, { status: 201 });
     } catch (error) {
-        return NextResponse.json({ message: 'Failed to update record' }, { status: 500 });
+        return NextResponse.json({ message: 'Failed to update recor' }, { status: 500 });
     }
 }
 
@@ -25,10 +25,10 @@ export async function DELETE ({}, { params }: { params: { id: string } }) {
         await connectMongoDB();
 
         const { id } = await params;
-        await BusClass.findByIdAndDelete(id);
+        await Status.findByIdAndDelete(id);
 
-        return NextResponse.json({ message: 'Successfully deleted bus class' }, { status: 201 });
+        return NextResponse.json({ message: 'Successfully deleted record' }, { status: 201 });
     } catch (error) {
-        return NextResponse.json({ message: 'Failed to delete bus class' }, { status: 500 });
+        return NextResponse.json({ message: 'Failed to delete record' }, { status: 500 });
     }
 }

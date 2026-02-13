@@ -1,11 +1,12 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose from 'mongoose';
 
 const scheduleSchema = new mongoose.Schema({
     bus: { type: mongoose.Schema.Types.ObjectId, ref: 'Bus' },
-    route: { type: mongoose.Schema.Types.ObjectId, ref: 'Route' },
+    busRoute: { type: mongoose.Schema.Types.ObjectId, ref: 'BusRoute' },
     departureDatetime: Date,
     arrivalDatetime: Date,
-    price: Number
+    price: Number,
+    active: Boolean
 }, {
     timestamps: true
 });

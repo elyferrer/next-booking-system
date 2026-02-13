@@ -1,13 +1,13 @@
-import BusClass from "@/lib/models/busClass";
+import BusCompany from "@/lib/models/busCompany";
 import connectMongoDB from "@/lib/mongodbConnection";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET () {
     try {
         await connectMongoDB();
-        const data = await BusClass.find();
+        const data = await BusCompany.find();
 
-        return NextResponse.json({ message: 'Sucessfully retrieved data', data }, { status: 200 });
+        return NextResponse.json({ message: 'Successfully retrieved data', data }, { status: 200 });
     } catch (error) {
         return NextResponse.json({ message: 'Failed to retrieve data' }, { status: 500 })
     }
@@ -16,14 +16,11 @@ export async function GET () {
 export async function POST (request: NextRequest) {
     try {
         await connectMongoDB();
-        const { name, description, active } = await request.json();
-        const data = new BusClass({ name, description, active });
+        const { name, description, active, remarks } = await request.json();
+        const data = new BusCompany({ name, description, active, remarks });
         await data.save();
 
-        return NextResponse.json({ 
-            message: 'Record successfully created', 
-            data
-        }, { status: 201 });
+        return NextResponse.json({ message: 'Record successfully created', data }, { status: 201 });
     } catch (error) {
         return NextResponse.json({ message: 'Failed to add new record' }, { status: 500 })
     }

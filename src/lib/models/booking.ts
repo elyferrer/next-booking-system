@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
 
 const bookingSchema = new mongoose.Schema({
+    email: String,
+    mobile: String,
     outboundSchedule: { type: mongoose.Schema.Types.ObjectId, ref: 'Schedule' },
     returnSchedule: { type: mongoose.Schema.Types.ObjectId, ref: 'Schedule' },
-    bookingDate: Date,
     passengers: [{ 
         lastName: String, 
         firstName: String, 
@@ -13,7 +14,8 @@ const bookingSchema = new mongoose.Schema({
     }],
     passengerCount: Number,
     totalPrice: Number,
-    status: { type: mongoose.Schema.Types.ObjectId, ref: 'Status' }
+    status: { type: mongoose.Schema.Types.ObjectId, ref: 'Status' },
+    remarks: String
 }, {
     timestamps: true
 });

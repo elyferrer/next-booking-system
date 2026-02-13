@@ -5,7 +5,8 @@ const busSchema = new mongoose.Schema({
     plateNumber: String,
     capacity: Number,
     active: Boolean,
-    class: { type: mongoose.Schema.Types.ObjectId, ref: 'BusClass' }
+    busClass: { type: mongoose.Schema.Types.ObjectId, ref: 'BusClass' },
+    busCompany: { type: mongoose.Schema.Types.ObjectId, ref: 'BusCompany' }
 }, {
     timestamps: true
 });
