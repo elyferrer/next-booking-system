@@ -1,24 +1,25 @@
 import User from "@/lib/models/user";
 import connectMongoDB from "@/lib/mongodbConnection";
+import { verifyToken, parseAuthToken } from "@/utils/jwt";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET () {
     try {
-        await connectMongoDB();
-        const data = await User.aggregate([
-            {
-                "$lookup": {
-                    "from": "usertypes", "localField": "userType", "foreignField": "_id", "as": "userType"
-                }
-            }, { "$unwind": "$userType" }
-        ]);
+        const token = await verifyToken();
 
-        return NextResponse.json({ message: 'Successfully retrieved data', data }, { status: 200 });
+        if (token) {
+            const payload = await parseAuthToken(token);
+            const user = await User.findOne({ _id: payload.ref });
+
+            return NextResponse.json({ message: "Successful retrieved user details", user }, { status: 200 });
+        }
+
+        return NextResponse.json({ message: "Session already expired" }, { status: 404 });
     } catch (error) {
-        console.log(error);
-        return NextResponse.json({ message: 'Failed to retrieve data' }, { status: 500 })
+        return NextResponse.json({ message: "Failed to retrieved user details" }, { status: 500 });
     }
+    
 }
 
 export async function POST (request: NextRequest) {
